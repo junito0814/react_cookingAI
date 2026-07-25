@@ -1,0 +1,26 @@
+.want{
+    background-color: rgb(81, 81, 255);
+    color: aliceblue;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.done{
+    background-color: rgb(255, 180, 88);
+    color: aliceblue;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.wantAgain{
+    background-color: rgb(255, 103, 103);
+    color: aliceblue;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
