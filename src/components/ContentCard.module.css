@@ -9,16 +9,61 @@
     transition: 0.3s;
 }
 
-.card:hover{
+.card:hover {
     transform: scale(1.05);
     background-color: #ffffff;
 }
 
+.cardActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.editButton,
+.deleteButton {
+    border: none;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.editButton {
+    background-color: #dbeafe;
+    color: #1d4ed8;
+}
+
+.deleteButton {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
+
+.likeButton,
+.likeButtonActive {
+    border: none;
+    border-radius: 999px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.likeButton {
+    background-color: #f3f4f6;
+    color: #374151;
+}
+
+.likeButtonActive {
+    background-color: #fef2f2;
+    color: #dc2626;
+}
 
 .name {
-    margin:10px auto 20px auto;
+    margin: 10px auto 20px auto;
     font-size: 30px;
-    color: brown; 
+    color: brown;
     display: flex;
     justify-content: center;
     align-items: center;
