@@ -2,7 +2,7 @@ import { useState } from "react";
 import ContentCard from "../components/ContentCard";
 import "../App.css";
 
-function App({onAdd}) {
+function App({ onAdd }) {
     const [name, setName] = useState("");
     const [feel, setFeature] = useState("和食");
     const [passion, setTone] = useState("簡単");
@@ -10,6 +10,14 @@ function App({onAdd}) {
     const [loading, setLoading] = useState(false);
     const [contents, setContents] = useState([]); // 生成物のリスト
 
+
+    function buildFallbackRecipe() {
+        return `【${name || "食材"}を使った${feel || "和食"}レシピ】
+- 料理名: ${name || "簡単料理"}の${feel || "和食"}炒め
+- 材料: ${name || "食材"}、玉ねぎ、にんにく、醤油、みりん
+- 作り方: 1. 材料を切る 2. フライパンで炒める 3. 味を整えて完成
+- ポイント: ${passion || "簡単"}で作れるように、火加減を調整すると失敗しにくいです。`;
+    }
 
     async function handleGenerate() {
         setLoading(true);
@@ -24,46 +32,66 @@ function App({onAdd}) {
                     `;
 
         const key = import.meta.env.VITE_GROQ_API_KEY;
-        console.log("KEYある?", !!key, "／ gsk_で始まる?", key?.startsWith("gsk_"));
+        const fallbackText = buildFallbackRecipe();
 
-        const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${key}`,
-            },
-            body: JSON.stringify({
-                model: "llama-3.3-70b-versatile",
-                messages: [{ role: "user", content: prompt }],
-            }),
-        });
-
-        const data = await res.json();
-        const text = data.choices[0].message.content;
-        // 新しい生成物を1件つくる
-        const newItem = {
-            id: Date.now(),      // 重複しない id（ミリ秒の数）
-            name: name,
-            body: text,
-            status: "作りたい",
-        };
-
-        console.log("status:", res.status, "body:", data);
-
-        if (!res.ok) {
-            setResult("エラー " + res.status + "：" + (data.error?.message || "不明"));
+        if (!key) {
+            const fallbackItem = {
+                id: Date.now(),
+                name: name,
+                body: fallbackText,
+                status: "作りたい",
+            };
+            setResult(`APIキーが未設定のため、サンプル内容を作成しました。\n\n${fallbackText}`);
+            onAdd(fallbackItem);
             setLoading(false);
             return;
         }
-        setResult(data.choices[0].message.content);
-        // 既存リストの先頭に追加（元の配列は壊さず、新しい配列を作る）
-        // setContents([newItem, ...contents]);
-        onAdd(newItem);
-        setLoading(false);
+
+        try {
+            const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${key}`,
+                },
+                body: JSON.stringify({
+                    model: "llama-3.3-70b-versatile",
+                    messages: [{ role: "user", content: prompt }],
+                }),
+            });
+
+            const data = await res.json();
+            const text = data?.choices?.[0]?.message?.content?.trim();
+
+            if (!res.ok || !text) {
+                throw new Error(data?.error?.message || "生成に失敗しました。")
+            }
+
+            const newItem = {
+                id: Date.now(),
+                name: name,
+                body: text,
+                status: "作りたい",
+            };
+
+            setResult(text);
+            onAdd(newItem);
+        } catch (error) {
+            const fallbackItem = {
+                id: Date.now(),
+                name: name,
+                body: fallbackText,
+                status: "作りたい",
+            };
+            setResult(`生成に失敗したため、サンプル内容を作成しました。\n\n${fallbackText}`);
+            onAdd(fallbackItem);
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (
-        <div style={{ padding: 24, maxWidth: 480, backgroundColor:"#ffffff", borderRadius:"8%"}} className="page">
+        <div style={{ padding: 24, maxWidth: 480, backgroundColor: "#ffffff", borderRadius: "8%" }} className="page">
 
             <div className="form">
                 <div className="item">
